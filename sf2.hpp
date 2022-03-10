@@ -451,7 +451,7 @@ namespace SF2
 				/*This is the degree, in 0.1% units, to which the audio output of the note is sent to the
 				chorus effects processor. A value of 0% or less indicates no signal is sent from this
 				note; a value of 100% or more indicates the note is sent at full level. Note that this
-				parameter has no effect on the amount of this signal sent to the “dry” or unprocessed
+				parameter has no effect on the amount of this signal sent to the Â“dryÂ” or unprocessed
 				portion of the output. For example, a value of 250 indicates that the signal is sent at
 				25% of full level (attenuation of 12 dB from full level) to the chorus effects
 				processor. */
@@ -460,13 +460,13 @@ namespace SF2
 				/*This is the degree, in 0.1% units, to which the audio output of the note is sent to the
 				reverb effects processor. A value of 0% or less indicates no signal is sent from this
 				note; a value of 100% or more indicates the note is sent at full level. Note that this
-				parameter has no effect on the amount of this signal sent to the “dry” or unprocessed
+				parameter has no effect on the amount of this signal sent to the Â“dryÂ” or unprocessed
 				portion of the output. For example, a value of 250 indicates that the signal is sent at
 				25% of full level (attenuation of 12 dB from full level) to the reverb effects
 				processor. */
 				reverbEffectsSend = 16,
 
-				/*This is the degree, in 0.1% units, to which the “dry” audio output of the note is
+				/*This is the degree, in 0.1% units, to which the Â“dryÂ” audio output of the note is
 				positioned to the left or right output. A value of -50% or less indicates the signal is
 				sent entirely to the left output and not sent to the right output; a value of +50% or
 				more indicates the note is sent entirely to the right and not sent to the left. A value of
@@ -492,7 +492,7 @@ namespace SF2
 				7973. */
 				delayModLFO = 21,
 
-				/*This is the frequency, in absolute cents, of the Modulation LFO’s triangular period.
+				/*This is the frequency, in absolute cents, of the Modulation LFOÂ’s triangular period.
 				A value of zero indicates a frequency of 8.176 Hz. A negative value indicates a
 				frequency less than 8.176 Hz; a positive value a frequency greater than 8.176 Hz.
 				For example, a frequency of 10 mHz would be 1200log2(.01/8.176) = -11610. */
@@ -505,7 +505,7 @@ namespace SF2
 				delay. For example, a delay of 10 msec would be 1200log2(.01) = -7973. */
 				delayVibLFO = 23,
 
-				/*This is the frequency, in absolute cents, of the Vibrato LFO’s triangular period. A
+				/*This is the frequency, in absolute cents, of the Vibrato LFOÂ’s triangular period. A
 				value of zero indicates a frequency of 8.176 Hz. A negative value indicates a
 				frequency less than 8.176 Hz; a positive value a frequency greater than 8.176 Hz.
 				For example, a frequency of 10 mHz would be 1200log2(.01/8.176) = -11610. */
@@ -520,7 +520,7 @@ namespace SF2
 
 				/*This is the time, in absolute timecents, from the end of the Modulation Envelope
 				Delay Time until the point at which the Modulation Envelope value reaches its peak.
-				Note that the attack is “convex”; the curve is nominally such that when applied to a
+				Note that the attack is Â“convexÂ”; the curve is nominally such that when applied to a
 				decibel or semitone parameter, the result is linear in amplitude or Hz respectively. A
 				value of 0 indicates a 1 second attack time. A negative value indicates a time less
 				than one second; a positive value a time longer than one second. The most negative
@@ -594,7 +594,7 @@ namespace SF2
 
 				/*This is the time, in absolute timecents, from the end of the Volume Envelope Delay
 				Time until the point at which the Volume Envelope value reaches its peak. Note that
-				the attack is “convex”; the curve is nominally such that when applied to the decibel
+				the attack is Â“convexÂ”; the curve is nominally such that when applied to the decibel
 				volume parameter, the result is linear in amplitude. A value of 0 indicates a 1 second
 				attack time. A negative value indicates a time less than one second; a positive value
 				a time longer than one second. The most negative number (-32768) conventionally
@@ -682,7 +682,7 @@ namespace SF2
 				velRange = 44,
 
 				/*The offset, in 32768 sample data point increments beyond the Startloop sample
-				header parameter and the first sample data point to be repeated in this instrument’s
+				header parameter and the first sample data point to be repeated in this instrumentÂ’s
 				loop. This parameter is added to the startloopAddrsOffset parameter. For example,
 				if Startloop were 5, startloopAddrsOffset were 3 and startAddrsCoarseOffset were 2,
 				the first sample data point in the loop would be sample data point 65544. */
@@ -832,7 +832,7 @@ namespace SF2
 				CHAR achPresetName[20];
 				WORD wPreset;//MIDI Preset Number
 				WORD wBank;//MIDI Bank Number
-				WORD wPresetBagNdx;//index to the preset’s zone list
+				WORD wPresetBagNdx;//index to the presetÂ’s zone list
 				DWORD dwLibrary;//reserved
 				DWORD dwGenre;//reserved
 				DWORD dwMorphology;//reserved
@@ -842,7 +842,7 @@ namespace SF2
 
 			struct sfPresetBag
 			{
-				WORD wGenNdx;//index to the preset’s zone list of generators in PGEN
+				WORD wGenNdx;//index to the presetÂ’s zone list of generators in PGEN
 				WORD wModNdx;//index to the list of modulators in PMOD
 			};
 			//Pointers to first entries of preset zone generator and modulator lists
@@ -880,7 +880,7 @@ namespace SF2
 			struct sfInst
 			{
 				CHAR achInstName[20];
-				//index to the instrument’s zone list in the IBAG sub-chunk
+				//index to the instrumentÂ’s zone list in the IBAG sub-chunk
 				WORD wInstBagNdx;
 			};
 			//Instrument list
@@ -888,7 +888,7 @@ namespace SF2
 
 			struct sfInstBag
 			{
-				//index to the instrument zone’s list of generators in the IGEN sub-chunk
+				//index to the instrument zoneÂ’s list of generators in the IGEN sub-chunk
 				WORD wInstGenNdx;
 				//index to the list of modulators in the IMOD sub-chunk
 				WORD wInstModNdx;
@@ -940,7 +940,7 @@ namespace SF2
 				DWORD dwStartloop;
 				//index, in sample data points, from the beginning of the sample data
 				//field to the first data point following the loop of this sample.
-				//Note that this is the data point “equivalent to” the first loop data point,
+				//Note that this is the data point Â“equivalent toÂ” the first loop data point,
 				//and that to produce portable artifact free loops, the eight proximal data
 				//points surrounding both the Startloop and Endloop points should be identical. 
 				DWORD dwEndloop;
@@ -2056,13 +2056,13 @@ namespace SF2
 			//of preset zone generators for each preset zone within the SoundFont
 			//compatible file.
 			//
-			/*The preset zone’s wGenNdx points to the first generator
+			/*The preset zoneÂ’s wGenNdx points to the first generator
 			for that preset zone. Unless the zone is a global zone, the last
-			generator in the list is an “Instrument” generator,
+			generator in the list is an Â“InstrumentÂ” generator,
 			whose value is a pointer to the instrument associated with that zone.
-			If a “key range” generator exists for the preset zone,
+			If a Â“key rangeÂ” generator exists for the preset zone,
 			it is always the first generator in the list for that preset zone.
-			If a “velocity range” generator exists for the preset zone,
+			If a Â“velocity rangeÂ” generator exists for the preset zone,
 			it will only be preceded by a key range generator. If any generators follow an
 			Instrument generator, they will be ignored.
 
@@ -2101,8 +2101,8 @@ namespace SF2
 			//instrument zones within the SoundFont compatible file. 
 			//
 			/*The first zone in a given instrument is located at that
-			instrument’s wInstBagNdx. The number of zones in the instrument is
-			determined by the difference between the next instrument’s wInstBagNdx
+			instrumentÂ’s wInstBagNdx. The number of zones in the instrument is
+			determined by the difference between the next instrumentÂ’s wInstBagNdx
 			and the current wInstBagNdx.
 
 			If an instrument has more than one zone, the first zone may be a global zone.
@@ -2122,10 +2122,10 @@ namespace SF2
 			//The IMOD sub-chunk is a required sub-chunk listing all
 			//instrument zone modulators within the SoundFont compatible file.
 			//
-			/*The zone’s wInstModNdx points to the first modulator for that zone,
+			/*The zoneÂ’s wInstModNdx points to the first modulator for that zone,
 			and the number of modulators present for a zone is determined
-			by the difference between the next higher zone’s wInstModNdx
-			and the current zone’s wModNdx.
+			by the difference between the next higher zoneÂ’s wInstModNdx
+			and the current zoneÂ’s wModNdx.
 			A difference of zero indicates there are no modulators in this zone.
 
 			Modulators in the IMOD sub-chunk are absolute.
@@ -2146,11 +2146,11 @@ namespace SF2
 			//The IGEN chunk is a required chunk containing a list of zone generators
 			//for each instrument zone within the SoundFont compatible file.
 			//
-			/*The zone’s wInstGenNdx points to the first generator for that zone.
+			/*The zoneÂ’s wInstGenNdx points to the first generator for that zone.
 			Unless the zone is a global zone, the last generator in the list is
-			a “sampleID” generator, whose value is a pointer to the sample associated
-			with that zone. If a “key range” generator exists for the zone, it is always
-			the first generator in the list for that zone. If a “velocity range” generator
+			a Â“sampleIDÂ” generator, whose value is a pointer to the sample associated
+			with that zone. If a Â“key rangeÂ” generator exists for the zone, it is always
+			the first generator in the list for that zone. If a Â“velocity rangeÂ” generator
 			exists for the zone, it will only be preceded by a key range generator.
 			If any generators follow a sampleID generator, they will be ignored.
 
@@ -2189,7 +2189,7 @@ namespace SF2
 			If sfSampleType indicates a left or right sample, then wSampleLink is the sample
 			header index of the associated right or left stereo sample respectively.
 			Both samples should be played entirely syncrhonously, with their pitch controlled
-			by the right sample’s generators. All non-pitch generators should apply as normal;
+			by the right sampleÂ’s generators. All non-pitch generators should apply as normal;
 			in particular the panning of the individual samples to left and right should
 			be accomplished via the pan generator.
 			Left-right pairs should always be found within the same instrument.
