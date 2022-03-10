@@ -1,3 +1,5 @@
+//cringe container should be removed probably and replaced with vector+swap and pop
+
 #pragma once
 
 #include <cstdlib>
