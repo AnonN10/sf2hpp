@@ -1969,7 +1969,7 @@ namespace SF2
 			RIFF_SoundFont2 sf2(riff);
 
 			SF2_DEBUG_OUTPUT("Reading file info...\n");
-			read_versiontag(sf2.INFO.ifil, ifil, 256);
+			read_versiontag(sf2.INFO.ifil, ifil);
 			//check version
 			if(ifil.wMajor != 2)
 			{
@@ -1979,7 +1979,7 @@ namespace SF2
 			read_zstr(sf2.INFO.isng, szSoundEngine, 256);
 			read_zstr(sf2.INFO.INAM, szName, 256);
 			read_zstr(sf2.INFO.irom, szROM, 256);
-			read_versiontag(sf2.INFO.iver, iver, 256);
+			read_versiontag(sf2.INFO.iver, iver);
 			read_zstr(sf2.INFO.ICRD, szDate, 256);
 			read_zstr(sf2.INFO.IENG, szCreator, 256);
 			read_zstr(sf2.INFO.IPRD, szProduct, 256);
