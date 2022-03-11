@@ -17,8 +17,8 @@ jobs:
     - uses: actions/checkout@v2
 
     - uses: actions/download-artifact@v3
-        with:
-          path: ${{runner.workspace}}
+      with:
+        path: ${{runner.workspace}}
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
