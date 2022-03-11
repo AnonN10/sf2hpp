@@ -2297,26 +2297,6 @@ namespace SF2
 					{
 						Instrument::Zone* global_zone = nullptr;
 
-						//test
-						/*if(instruments[i]->name[0] == 'S' &&
-						   instruments[i]->name[1] == 'y' &&
-						   instruments[i]->name[2] == 'n' &&
-						   instruments[i]->name[3] == 't' &&
-						   instruments[i]->name[4] == 'h' &&
-						   instruments[i]->name[5] == ' ' &&
-						   instruments[i]->name[6] == 'S' &&
-						   instruments[i]->name[7] == 't' &&
-						   instruments[i]->name[8] == 'r' &&
-						   instruments[i]->name[9] == 'i' &&
-						   instruments[i]->name[10] == 'n' &&
-						   instruments[i]->name[11] == 'g' &&
-						   instruments[i]->name[12] == 's' &&
-						   instruments[i]->name[13] == ' ' &&
-						   instruments[i]->name[14] == '2')
-						{
-							int breakpoint_here = 1;
-						}*/
-
 						size_t j = inst->wInstBagNdx;
 						//first zone of the next instrument marks the end of the current
 						//instrument zone list
@@ -2966,7 +2946,6 @@ namespace SF2
 						p->layers.push_back(layer);
 					}
 				}
-				//delete global_zone;
 			}
 
 
