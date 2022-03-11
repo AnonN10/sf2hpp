@@ -16,10 +16,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - uses: actions/download-artifact@v3
-      with:
-        path: ${{runner.workspace}}
-
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
@@ -30,7 +26,7 @@ jobs:
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
-      run: cmake --build . --config ${{matrix.build-type}} -DTEST_SF2_FILE=${{runner.workspace}}/test.sf2
+      run: cmake --build . --config ${{matrix.build-type}}
 
     - name: Test
       working-directory: ${{runner.workspace}}/build

@@ -7,4 +7,6 @@ target_include_directories(sf2hpp INTERFACE .)
 add_executable(example example.cpp)
 target_link_libraries(example PUBLIC sf2hpp)
 
-add_test(NAME run_example COMMAND example ${TEST_SF2_FILE})
+include(CTest)
+set(TEST_SF2_FILE "UprightPianoKW-small-20190703.sf2")
+add_test(NAME run_example COMMAND example "${PROJECT_SOURCE_DIR}/data/${TEST_SF2_FILE}")
