@@ -4,12 +4,13 @@ A header-only library for SoundFont2 loading and sound synthesis.
 
 ## Features
 
-- Supports the SoundFont 2.04 specification
+- Written against the SoundFont 2.04 specification
 - Contains fixes for non-conformant soundfonts
 - Supports polyphonic audio rendering
-- Supports Sustain and what is necessary for playback
 
-This library does not support Modulators and Continuous Controllers.
+## TODO
+
+This library does not yet support Modulators and any Continuous Controllers, with the exception of sustain.
 
 ## Example
 
