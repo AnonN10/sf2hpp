@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.9)
 project(sf2hpp)
 
+set(CMAKE_CXX_STANDARD 17)
+
 add_library(sf2hpp INTERFACE)
 target_include_directories(sf2hpp INTERFACE .)
 
