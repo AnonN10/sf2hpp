@@ -1,7 +1,8 @@
-﻿#include <fstream>
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <cstdlib>
 
 #include "sf2.hpp"
 
@@ -38,8 +39,11 @@ struct WAV_Header {
 int main(int argc, char *argv[]) {
     static_assert(sizeof(WAV_Header) == 44, "");
 
-    if (argc <= 1)
+    if(argc <= 1)
+    {
         std::cerr << "must specify a path to sf2 file" << std::endl;
+        return EXIT_FAILURE;
+    }
 
     std::string sf_path(argv[1]);
 
@@ -76,23 +80,45 @@ int main(int argc, char *argv[]) {
     channel.sf = &sf;
     channel.SetPreset(0, 0);
 
+    //allocate output data
+    uint32_t
+        buffer_frames = 512,
+        num_buffers_hold = 90,
+        num_buffers_release = 10,
+        channel_num_samples = buffer_frames*(num_buffers_hold+num_buffers_release);
+    std::vector<float> output;
+    output.resize(channel_num_samples*2);
+
     //play C major chord
     channel.NoteOn(60, 127, SAMPLE_RATE);
     channel.NoteOn(64, 127, SAMPLE_RATE);
     channel.NoteOn(67, 127, SAMPLE_RATE);
+    //render 2-channel float data with keys held
+    channel.Render(
+        output.data(),
+        output.data()+channel_num_samples,
+        buffer_frames*num_buffers_hold,
+        SAMPLE_RATE
+    );
+    //release keys
+    channel.NoteOff(60);
+    channel.NoteOff(64);
+    channel.NoteOff(67);
+    //render the rest of the data with keys released
+    channel.Render(
+        output.data()+buffer_frames*num_buffers_hold,
+        output.data()+buffer_frames*num_buffers_hold+channel_num_samples,
+        buffer_frames*num_buffers_release,
+        SAMPLE_RATE
+    );
 
-    //render 2-channel float data
-    uint32_t num_samples = 512*100;
-    std::vector<float> output;
-    output.resize(num_samples*2);
-    channel.Render(output.data(), output.data()+num_samples, num_samples, SAMPLE_RATE);
     //interleave data
     std::vector<float> tmp_output(output.size());
     std::swap(tmp_output, output);
     for(size_t i = 0; i < output.size()/2; ++i)
     {
         output[i*2] = tmp_output[i];
-        output[i*2+1] = tmp_output[i+num_samples];
+        output[i*2+1] = tmp_output[i+channel_num_samples];
     }
 
     //write to WAV
@@ -104,5 +130,5 @@ int main(int argc, char *argv[]) {
     out.write(reinterpret_cast<const char *>(&wav), sizeof(wav));
     out.write(reinterpret_cast<const char *>(output.data()), data_size);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
