@@ -1,4 +1,4 @@
-# sf2hpp
+# sf2hpp ![build-and-test](https://github.com/AnonN10/sf2hpp/actions/workflows/cmake.yml/badge.svg)
 
 A header-only library for SoundFont2 loading and sound synthesis.
 
