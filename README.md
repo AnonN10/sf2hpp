@@ -4,7 +4,7 @@ A header-only library for SoundFont2 loading and sound synthesis.
 
 ## Features
 
-- Supports the SoundFont 2.4 specification
+- Supports the SoundFont 2.04 specification
 - Contains fixes for non-conformant soundfonts
 - Supports polyphonic audio rendering
 - Supports Sustain and what is necessary for playback
