@@ -838,7 +838,7 @@ namespace SF2
 				DWORD dwMorphology;//reserved
 			};
 			//Preset header list
-			std::vector<sfPresetHeader*> phdr;
+			std::vector<std::unique_ptr<sfPresetHeader>> phdr;
 
 			struct sfPresetBag
 			{
@@ -846,7 +846,7 @@ namespace SF2
 				WORD wModNdx;//index to the list of modulators in PMOD
 			};
 			//Pointers to first entries of preset zone generator and modulator lists
-			std::vector<sfPresetBag*> pbag;
+			std::vector<std::unique_ptr<sfPresetBag>> pbag;
 
 			struct sfModList
 			{
@@ -865,7 +865,7 @@ namespace SF2
 				SFTransform sfModTransOper;
 			};
 			//Preset zone modulators
-			std::vector<sfModList*> pmod;
+			std::vector<std::unique_ptr<sfModList>> pmod;
 
 			struct sfGenList
 			{
@@ -875,7 +875,7 @@ namespace SF2
 				genAmountType genAmount;
 			};
 			//Preset zone generators
-			std::vector<sfGenList*> pgen;
+			std::vector<std::unique_ptr<sfGenList>> pgen;
 
 			struct sfInst
 			{
@@ -884,7 +884,7 @@ namespace SF2
 				WORD wInstBagNdx;
 			};
 			//Instrument list
-			std::vector<sfInst*> inst;
+			std::vector<std::unique_ptr<sfInst>> inst;
 
 			struct sfInstBag
 			{
@@ -894,7 +894,7 @@ namespace SF2
 				WORD wInstModNdx;
 			};
 			//Pointers to first entries of instrument zone generator and modulator lists
-			std::vector<sfInstBag*> ibag;
+			std::vector<std::unique_ptr<sfInstBag>> ibag;
 
 			struct sfInstModList
 			{
@@ -913,7 +913,7 @@ namespace SF2
 				SFTransform sfModTransOper;
 			};
 			//Instrument zone modulators
-			std::vector<sfInstModList*> imod;
+			std::vector<std::unique_ptr<sfInstModList>> imod;
 
 			struct sfInstGenList
 			{
@@ -923,7 +923,7 @@ namespace SF2
 				genAmountType genAmount;
 			};
 			//Instrument zone generators
-			std::vector<sfInstGenList*> igen;
+			std::vector<std::unique_ptr<sfInstGenList>> igen;
 
 			struct sfSample
 			{
@@ -962,20 +962,7 @@ namespace SF2
 				SFSampleLink sfSampleType;
 			};
 			//Samples
-			std::vector<sfSample*> shdr;
-
-			~HYDRA()
-			{
-				for(auto i : ibag) delete i;
-				for(auto i : igen) delete i;
-				for(auto i : imod) delete i;
-				for(auto i : inst) delete i;
-				for(auto i : pbag) delete i;
-				for(auto i : pgen) delete i;
-				for(auto i : phdr) delete i;
-				for(auto i : pmod) delete i;
-				for(auto i : shdr) delete i;
-			}
+			std::vector<std::unique_ptr<sfSample>> shdr;
 		};
 		HYDRA hydra;
 
@@ -994,34 +981,29 @@ namespace SF2
 			int8_t correction;
 
 			uint32_t data_stream_offset;
-			float* data = nullptr;
+			std::unique_ptr<float[]> data;
 			uint32_t size;
 
 			SFSampleLink sample_type;
 			Sample* linked_sample;
 
-			~Sample()
-			{
-				delete data;
-			}
-
 			void load_data(SoundFont2& sf2)
 			{
 				SF2_DEBUG_OUTPUT((std::string("Loading sample data \"") + name + "\"...\n").c_str());
-				int16_t* data16 = new int16_t[size];
+				auto data16 = std::make_unique<int16_t[]>(size);
 				//set up position of the stream
 				sf2.stream->setpos(sf2.sample_data_offset+data_stream_offset*sizeof(int16_t));
 				//read 16 bit samples
-				sf2.stream->read(data16, size*sizeof(int16_t));
+				sf2.stream->read(data16.get(), size*sizeof(int16_t));
 				if(sf2.sample_data_24_offset)
 				{
-					uint8_t* data24 = new uint8_t[size];
+					auto data24 = std::make_unique<uint8_t[]>(size);
 					//set up position of the stream
 					sf2.stream->setpos(sf2.sample_data_24_offset+data_stream_offset);
 					//read 8 bit of 24 bit complementary additional sample data
-					sf2.stream->read(data24, size);
+					sf2.stream->read(data24.get(), size);
 					//combine both buffers, convert to float and store
-					data = new float[size];
+					data = std::make_unique<float[]>(size);
 					for(uint32_t j = 0; j < size; ++j)
 					{
 						data[j] = (float)
@@ -1033,18 +1015,15 @@ namespace SF2
 									) >> 8
 								) / 8388607.0;
 					}
-					delete data16;
-					delete data24;
 				}
 				else
 				{
 					//just convert to float and store
-					data = new float[size];
+					data = std::make_unique<float[]>(size);
 					for(uint32_t j = 0; j < size; ++j)
 					{
 						data[j] = (float)data16[j] / 32767.0;
 					}
-					delete data16;
 				}
 
 				//test
@@ -1054,7 +1033,7 @@ namespace SF2
 				outfile.close();*/
 			}
 		};
-		std::vector<Sample*> samples;
+		std::vector<std::unique_ptr<Sample>> samples;
 
 		struct LFO
 		{
@@ -1163,9 +1142,9 @@ namespace SF2
 				Envelope volEnv;
 			};
 			//Zone* global_zone = nullptr;
-			std::vector<Zone*> splits;
+			std::vector<std::unique_ptr<Zone>> splits;
 		};
-		std::vector<Instrument*> instruments;
+		std::vector<std::unique_ptr<Instrument>> instruments;
 
 		struct Preset
 		{
@@ -1203,14 +1182,14 @@ namespace SF2
 				Envelope volEnv;
 			};
 			//Zone* global_zone = nullptr;
-			std::vector<Zone*> layers;
+			std::vector<std::unique_ptr<Zone>> layers;
 		};
 		struct Bank
 		{
 			uint16_t num;//MIDI Bank Number
-			std::vector<Preset*> presets;
+			std::vector<std::unique_ptr<Preset>> presets;
 		};
-		std::vector<Bank*> banks;
+		std::vector<std::unique_ptr<Bank>> banks;
 
 		struct BiQuadLowpass
 		{
@@ -1655,23 +1634,23 @@ namespace SF2
 
 				//find bank by number
 				Bank* target_bank = nullptr;
-				for(auto b : sf->banks)
+				for(auto& b : sf->banks)
 				{
 					if(b->num == bankno)
 					{
-						target_bank = b;
+						target_bank = b.get();
 						break;
 					}
 				}
 				if(!target_bank) goto fallback_bank_zero;
 
 				//try to find a matching preset in requested bank
-				for(auto p : target_bank->presets)
+				for(auto& p : target_bank->presets)
 				{
 					if(p->num == presetno)
 					{
 						bank = target_bank;
-						preset = p;
+						preset = p.get();
 						goto load_samples_proc;
 					}
 				}
@@ -1681,17 +1660,17 @@ namespace SF2
 				{
 					if(!target_bank->presets.empty())
 					{
-						preset = target_bank->presets[0];
+						preset = target_bank->presets[0].get();
 						goto load_samples_proc;
 					}
 				}
 			fallback_bank_zero:
-				for(auto p : sf->banks[0]->presets)
+				for(auto& p : sf->banks[0]->presets)
 				{
 					if(p->num == presetno)
 					{
-						bank = sf->banks[0];
-						preset = p;
+						bank = sf->banks[0].get();
+						preset = p.get();
 						goto load_samples_proc;
 					}
 				}
@@ -1700,9 +1679,9 @@ namespace SF2
 				//load samples
 				if(preset)
 				{
-					for(auto layer : preset->layers)
+					for(auto& layer : preset->layers)
 					{
-						for(auto split : layer->instrument->splits)
+						for(auto& split : layer->instrument->splits)
 						{
 							if(!split->sample->data)
 							{
@@ -1809,13 +1788,13 @@ namespace SF2
 		//Note On
 		void GenerateVoices(Preset* preset, uint8_t key, uint8_t velocity, float sample_rate, DynamicPool<Voice>& container)
 		{
-			for(auto layer : preset->layers)
+			for(auto& layer : preset->layers)
 			{
 				//check if passes by key and velocity
 				if(key < layer->key_low || layer->key_high < key ||
 				   velocity < layer->vel_low || layer->vel_high < velocity)
 					continue;
-				for(auto split : layer->instrument->splits)
+				for(auto& split : layer->instrument->splits)
 				{
 					//check if passes by key and velocity
 					if(key < split->key_low || split->key_high < key ||
@@ -1845,7 +1824,7 @@ namespace SF2
 						auto voice = &container.back();
 						voice->key = tmp_key;
 						voice->sample = sample;
-						voice->zone = split;
+						voice->zone = split.get();
 						voice->hold = true;
 
 						//sample points
@@ -2004,7 +1983,7 @@ namespace SF2
 			hydra.phdr.resize(sf2.pdta.phdr->size/38);
 			for(auto& preset : hydra.phdr)
 			{
-				preset = new HYDRA::sfPresetHeader;
+				preset = std::make_unique<HYDRA::sfPresetHeader>();
 				read_field(preset->achPresetName);
 				//null-terminate preset name
 				//but why do I have to do this anyway? Standard says I should reject it!
@@ -2030,7 +2009,7 @@ namespace SF2
 			hydra.pbag.resize(sf2.pdta.pbag->size/4);
 			for(auto& preset_zone : hydra.pbag)
 			{
-				preset_zone = new HYDRA::sfPresetBag;
+				preset_zone = std::make_unique<HYDRA::sfPresetBag>();
 				read_field(preset_zone->wGenNdx);
 				read_field(preset_zone->wModNdx);
 			}
@@ -2045,7 +2024,7 @@ namespace SF2
 			hydra.pmod.resize(sf2.pdta.pmod->size/10);
 			for(auto& modulator : hydra.pmod)
 			{
-				modulator = new HYDRA::sfModList;
+				modulator = std::make_unique<HYDRA::sfModList>();
 				read_field(modulator->sfModSrcOper);
 				read_field(modulator->sfModDestOper);
 				read_field(modulator->modAmount);
@@ -2080,7 +2059,7 @@ namespace SF2
 			hydra.pgen.resize(sf2.pdta.pgen->size/4);
 			for(auto& generator : hydra.pgen)
 			{
-				generator = new HYDRA::sfGenList;
+				generator = std::make_unique<HYDRA::sfGenList>();
 				read_field(generator->sfGenOper);
 				read_field(generator->genAmount);
 			}
@@ -2090,7 +2069,7 @@ namespace SF2
 			hydra.inst.resize(sf2.pdta.inst->size/22);
 			for(auto& instrument : hydra.inst)
 			{
-				instrument = new HYDRA::sfInst;
+				instrument = std::make_unique<HYDRA::sfInst>();
 				read_field(instrument->achInstName);
 				//null-terminate instrument name
 				//you think it's funny not to terminate a string, soundfont editing software?
@@ -2115,7 +2094,7 @@ namespace SF2
 			hydra.ibag.resize(sf2.pdta.ibag->size/4);
 			for(auto& instrument_zone : hydra.ibag)
 			{
-				instrument_zone = new HYDRA::sfInstBag;
+				instrument_zone = std::make_unique<HYDRA::sfInstBag>();
 				read_field(instrument_zone->wInstGenNdx);
 				read_field(instrument_zone->wInstModNdx);
 			}
@@ -2136,7 +2115,7 @@ namespace SF2
 			hydra.imod.resize(sf2.pdta.imod->size/10);
 			for(auto& instrument_zone_modulator : hydra.imod)
 			{
-				instrument_zone_modulator = new HYDRA::sfInstModList;
+				instrument_zone_modulator = std::make_unique<HYDRA::sfInstModList>();
 				read_field(instrument_zone_modulator->sfModSrcOper);
 				read_field(instrument_zone_modulator->sfModDestOper);
 				read_field(instrument_zone_modulator->modAmount);
@@ -2161,7 +2140,7 @@ namespace SF2
 			hydra.igen.resize(sf2.pdta.igen->size/4);
 			for(auto& zone_generator : hydra.igen)
 			{
-				zone_generator = new HYDRA::sfInstGenList;
+				zone_generator = std::make_unique<HYDRA::sfInstGenList>();
 				read_field(zone_generator->sfGenOper);
 				read_field(zone_generator->genAmount);
 			}
@@ -2202,7 +2181,7 @@ namespace SF2
 			hydra.shdr.resize(sf2.pdta.shdr->size/46);
 			for(auto& sample : hydra.shdr)
 			{
-				sample = new HYDRA::sfSample;
+				sample = std::make_unique<HYDRA::sfSample>();
 				read_field(sample->achSampleName);
 				//null-terminate sample name
 				//unfortunately, some soundfonts don't do that!
@@ -2233,7 +2212,7 @@ namespace SF2
 			for(size_t i = 0; i < hydra.phdr.size(); ++i)
 			{
 				//check for already listed ones
-				for(auto b : banks)
+				for(auto& b : banks)
 				{
 					if(b->num == hydra.phdr[i]->wBank)
 					{
@@ -2242,7 +2221,7 @@ namespace SF2
 					}
 				}
 				//not listed yet, add to the list
-				banks.push_back(new Bank);
+				banks.emplace_back(std::make_unique<Bank>());
 				banks.back()->num = hydra.phdr[i]->wBank;
 			next_preset:{}
 			}
@@ -2250,11 +2229,11 @@ namespace SF2
 			//Load samples
 			SF2_DEBUG_OUTPUT("Loading samples...\n");
 			samples.resize(hydra.shdr.size()-1);
-			for(auto& sample : samples) sample = new Sample;
+			for(auto& sample : samples) sample = std::make_unique<Sample>();
 
 			{
 				size_t i = 0;
-				for(auto sample = hydra.shdr[i]; sample != hydra.shdr.back(); ++i, sample = hydra.shdr[i])
+				for(auto sample = hydra.shdr[i].get(); sample != hydra.shdr.back().get(); ++i, sample = hydra.shdr[i].get())
 				{
 					samples[i]->name = (const char*)sample->achSampleName;
 					samples[i]->sample_rate = sample->dwSampleRate;
@@ -2271,7 +2250,7 @@ namespace SF2
 						samples[i]->sample_type = SFSampleLink::monoSample;
 					}
 					if(samples[i]->sample_type != SFSampleLink::monoSample)
-						samples[i]->linked_sample = samples[sample->wSampleLink];
+						samples[i]->linked_sample = samples[sample->wSampleLink].get();
 					else samples[i]->linked_sample = nullptr;
 					//Don't load sample data but prepare it for on demand streaming
 					//or manually requested loading
@@ -2289,22 +2268,22 @@ namespace SF2
 			instruments.resize(hydra.inst.size()-1);
 			{
 				size_t i = 0;
-				for(auto inst = hydra.inst[i]; inst != hydra.inst.back(); ++i, inst = hydra.inst[i])
+				for(auto inst = hydra.inst[i].get(); inst != hydra.inst.back().get(); ++i, inst = hydra.inst[i].get())
 				{
 
-					instruments[i] = new Instrument;
+					instruments[i] = std::make_unique<Instrument>();
 					instruments[i]->name = (const char*)hydra.inst[i]->achInstName;
 					{
-						Instrument::Zone* global_zone = nullptr;
+						std::unique_ptr<Instrument::Zone> global_zone;
 
 						size_t j = inst->wInstBagNdx;
 						//first zone of the next instrument marks the end of the current
 						//instrument zone list
-						auto iz_end = hydra.ibag[hydra.inst[i+1]->wInstBagNdx];
+						auto iz_end = hydra.ibag[hydra.inst[i+1]->wInstBagNdx].get();
 						//for each instrument zone
-						for(auto iz = hydra.ibag[j]; iz != iz_end; ++j, iz = hydra.ibag[j])
+						for(auto iz = hydra.ibag[j].get(); iz != iz_end; ++j, iz = hydra.ibag[j].get())
 						{							
-							auto split = new Instrument::Zone;
+							auto split = std::make_unique<Instrument::Zone>();
 							//Only instrument generators have default values
 							split->modEnv.SetToDefault();
 							split->volEnv.SetToDefault();
@@ -2321,9 +2300,9 @@ namespace SF2
 							}
 
 							size_t k = iz->wInstGenNdx;
-							auto igen_end = hydra.igen[hydra.ibag[j+1]->wInstGenNdx];
+							auto igen_end = hydra.igen[hydra.ibag[j+1]->wInstGenNdx].get();
 							//for each generator
-							for(auto ig = hydra.igen[k]; ig != igen_end; ++k, ig = hydra.igen[k])
+							for(auto ig = hydra.igen[k].get(); ig != igen_end; ++k, ig = hydra.igen[k].get())
 							{
 								/*
 								A generator in a local instrument zone that is identical to a default
@@ -2334,7 +2313,7 @@ namespace SF2
 								{
 								case SFGenerator::GenType::sampleID:
 								{
-									split->sample =	samples[ig->genAmount.wAmount];
+									split->sample =	samples[ig->genAmount.wAmount].get();
 									break;
 								}
 								case SFGenerator::GenType::startAddrsOffset:
@@ -2607,25 +2586,24 @@ namespace SF2
 								{
 									//global zone detected
 									//instruments[i]->global_zone = split;
-									global_zone = split;
+									global_zone = std::move(split);
 								} else goto discard_zone;
-							} else instruments[i]->splits.push_back(split);
+							} else instruments[i]->splits.push_back(std::move(split));
 
 							continue;
 						discard_zone:
 							{
-								delete instruments[i]->splits.back();
 								instruments[i]->splits.erase(
 									instruments[i]->splits.begin()+instruments[i]->splits.size()-1
 								);
 							}
+							global_zone = nullptr;
 						}
-						delete global_zone;
 					}
 
 					//instrument zone list
-					auto zones = hydra.ibag[hydra.inst[i]->wInstBagNdx];
-					auto zone_gen = hydra.igen[zones->wInstGenNdx];
+					auto zones = hydra.ibag[hydra.inst[i]->wInstBagNdx].get();
+					auto zone_gen = hydra.igen[zones->wInstGenNdx].get();
 					int dummy_dum = 0;
 				}
 			}
@@ -2634,19 +2612,9 @@ namespace SF2
 			SF2_DEBUG_OUTPUT("Loading presets...\n");
 			for(size_t i = 0; i < hydra.phdr.size()-1; ++i)
 			{
-				auto p = new Preset;
+				auto p = std::make_unique<Preset>();
 				p->name = (const char*)hydra.phdr[i]->achPresetName;
 				p->num = hydra.phdr[i]->wPreset;
-				//find bank
-				for(auto& bank : banks)
-				{
-					if(bank->num == hydra.phdr[i]->wBank)
-					{
-						//add preset to the bank
-						bank->presets.push_back(p);
-						break;
-					}
-				}
 
 				//a global zone is a first zone and may only exist if
 				//there is more than one zone for a given preset
@@ -2657,7 +2625,7 @@ namespace SF2
 				if((hydra.phdr[i+1]->wPresetBagNdx - hydra.phdr[i]->wPresetBagNdx) > 1)
 				{
 					//Get first zone of the preset
-					auto zone = hydra.pbag[hydra.phdr[i]->wPresetBagNdx];
+					auto zone = hydra.pbag[hydra.phdr[i]->wPresetBagNdx].get();
 					//Get first generator of the next zone to acts as an end of the current list.
 					//For this to work, there exists a dummy terminator zone in the end of the
 					//PGEN chunk just so we can iterate all of them using this method.
@@ -2679,9 +2647,9 @@ namespace SF2
 					size_t j = hydra.phdr[i]->wPresetBagNdx;
 					//first zone of the next preset marks the end of the current
 					//preset zone list
-					auto pz_end = hydra.pbag[hydra.phdr[i+1]->wPresetBagNdx];
+					auto pz_end = hydra.pbag[hydra.phdr[i+1]->wPresetBagNdx].get();
 					//for each preset zone
-					for(auto pz = hydra.pbag[j]; pz != pz_end; ++j, pz = hydra.pbag[j])
+					for(auto pz = hydra.pbag[j].get(); pz != pz_end; ++j, pz = hydra.pbag[j].get())
 					{
 						//check if zone isn't empty
 						if(hydra.pgen.begin()+pz->wGenNdx == hydra.pgen.begin()+hydra.pbag[j+1]->wGenNdx)
@@ -2710,7 +2678,7 @@ namespace SF2
 							//collect all generators from the global zone
 							for(auto pg = global_zone_begin; pg != global_zone_end; ++pg)
 							{
-								generators.push_back(*pg);
+								generators.push_back(pg->get());
 							}
 
 							//for each generator of the current preset zone
@@ -2722,12 +2690,12 @@ namespace SF2
 									if((*gen)->sfGenOper == (*pg)->sfGenOper)
 									{
 										//replace global generator with local
-										*gen = *pg;
+										*gen = pg->get();
 										goto pg_next_generator;
 									}
 								}
 								//generator is unique, has its effect added
-								generators.push_back(*pg);
+								generators.push_back(pg->get());
 							pg_next_generator:{}
 							}
 						}
@@ -2740,7 +2708,7 @@ namespace SF2
 						//check if no generators exist for this zone
 						if(generators.empty()) continue;
 
-						Preset::Zone* layer = new Preset::Zone;
+						auto layer = std::make_unique<Preset::Zone>();
 
 						//for each generator
 						for(auto pg = generators.begin(); pg != generators.end(); ++pg)
@@ -2749,7 +2717,7 @@ namespace SF2
 							{
 							case SFGenerator::GenType::instrument:
 							{
-								layer->instrument = instruments[(*pg)->genAmount.wAmount];
+								layer->instrument = instruments[(*pg)->genAmount.wAmount].get();
 								break;
 							}
 							case SFGenerator::GenType::modLfoToPitch:
@@ -2943,7 +2911,18 @@ namespace SF2
 							}
 						}
 						//add layer to the list
-						p->layers.push_back(layer);
+						p->layers.emplace_back(std::move(layer));
+					}
+				}
+
+				//find bank
+				for(auto& bank : banks)
+				{
+					if(bank->num == hydra.phdr[i]->wBank)
+					{
+						//add preset to the bank
+						bank->presets.emplace_back(std::move(p));
+						break;
 					}
 				}
 			}
@@ -2954,11 +2933,7 @@ namespace SF2
 			std::sort(
 				banks.begin(),
 				banks.end(),
-				[](Bank* a, Bank* b)
-				{
-					return a->num < b->num;
-				}
-			);
+				[](auto&& a, auto&& b) { return a->num < b->num; });
 			SF2_DEBUG_OUTPUT("Sorting presets...\n");
 			//Sort presets
 			for(auto& bank : banks)
@@ -2966,20 +2941,9 @@ namespace SF2
 				std::sort(
 					bank->presets.begin(),
 					bank->presets.end(),
-					[](Preset* a, Preset* b)
-					{
-						return a->num < b->num;
-					}
-				);
+					[](auto&& a, auto&& b) { return a->num < b->num; });
 			}
 
-		}
-
-		~SoundFont2()
-		{
-			for(auto i : banks) delete i;
-			for(auto i : instruments) delete i;
-			for(auto i : samples) delete i;
 		}
 	};
 }
