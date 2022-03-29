@@ -70,8 +70,9 @@ int main(int argc, char *argv[]) {
         static_cast<std::ifstream*>(src)->seekg(pos, static_cast<std::ifstream*>(src)->beg);
     };
     RIFF::RIFF riff;
-    std::ifstream* file = new std::ifstream(sf_path, std::ios::binary);
-    stream.src = file;
+
+    auto file = std::make_unique<std::ifstream>(sf_path, std::ios::binary);
+    stream.src = file.get();
     riff.parse(stream, false);
 
     //setup soundfont synthesizer and 1 channel

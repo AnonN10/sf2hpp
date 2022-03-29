@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory>
 
 #ifdef RIFF_DEBUG
 #include <iostream>
@@ -103,7 +104,7 @@ namespace RIFF
 			//The size of the chunk data in bytes, excluding any pad byte.
 			DWORD size;
 			//The actual data plus a pad byte if req’d to word align.
-			BYTE* data;
+			std::unique_ptr<BYTE[]> data;
 
 			//Form type for "RIFF" chunks or the list type for "LIST" chunks.
 			FOURCC type; 
@@ -120,9 +121,9 @@ namespace RIFF
 			{
 				size_t old_pos = s.getpos();
 				size_t data_size = get_padded_data_size();
-				data = new BYTE[data_size];
+				data = std::make_unique<BYTE[]>(data_size);
 				s.setpos(data_offset);			
-				if(s.read(data, data_size) < data_size)
+				if(s.read(data.get(), data_size) < data_size)
 				{
 					s.setpos(old_pos);
 					return false;
@@ -130,14 +131,9 @@ namespace RIFF
 				s.setpos(old_pos);
 				return true;
 			}
-
-			void free_data()
-			{
-				delete[] data;
-			}
 		};
 
-		std::vector<chunk*> chunks;
+		std::vector<std::unique_ptr<chunk>> chunks;
 
 		//In RIFF, order of chunks matters.
 		//Chunks of RIFF or LIST type contain subchunks,
@@ -147,7 +143,7 @@ namespace RIFF
 		{
 			for(size_t i = start_index; i < chunks.size(); ++i)
 			{
-				if(chunks[i]->id == id) return chunks[i];
+				if(chunks[i]->id == id) return chunks[i].get();
 			}
 			return nullptr;
 		}
@@ -155,7 +151,7 @@ namespace RIFF
 		{
 			for(size_t i = start_index; i < chunks.size(); ++i)
 			{
-				if(chunks[i]->type == type) return chunks[i];
+				if(chunks[i]->type == type) return chunks[i].get();
 			}
 			return nullptr;
 		}
@@ -163,7 +159,7 @@ namespace RIFF
 		{
 			for(size_t i = start_index; i < chunks.size(); ++i)
 			{
-				if(chunks[i]->id == id && chunks[i]->type == type) return chunks[i];
+				if(chunks[i]->id == id && chunks[i]->type == type) return chunks[i].get();
 			}
 			return nullptr;
 		}
@@ -237,21 +233,12 @@ namespace RIFF
 
 			while(true)
 			{
-				chunk* c = new chunk;
-				if(!read_chunk_info(s, c))
-				{
-					//couldn't load chunk info, stop
-					delete c;
+				auto c = std::make_unique<chunk>();
+				if(!read_chunk_info(s, c.get()))
 					break;
-				}
-				if(load_data)
-					if(!c->load_data(s))
-					{
-						//couldn't load data, stop
-						delete c;
-						break;
-					}
-				chunks.push_back(c);
+				if(load_data && !c->load_data(s))
+					break;
+				chunks.emplace_back(std::move(c));
 			}
 
 #ifdef RIFF_DEBUG
