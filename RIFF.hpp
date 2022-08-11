@@ -39,13 +39,6 @@ namespace RIFF
 	inline FOURCC string_to_FOURCC(const char* str)
 	{
 		FOURCC result = 0;
-		FOURCC* reee = &result;
-
-		/*int i = 0;
-		while(i < 4 && str[i] != '\0') ((char*)&result)[i] = str[i++];
-		while(i < 4) ((char*)&result)[i++] = ' ';*/
-
-		//result = (str[0] << 24) | (str[1] << 16) | (str[2] << 8) | str[3];
 
 		int i = 0;
 		while(i < 4 && str[i] != '\0')
@@ -103,7 +96,7 @@ namespace RIFF
 			FOURCC id;
 			//The size of the chunk data in bytes, excluding any pad byte.
 			DWORD size;
-			//The actual data plus a pad byte if req’d to word align.
+			//The actual data plus a pad byte if reqâ€™d to word align.
 			std::unique_ptr<BYTE[]> data;
 
 			//Form type for "RIFF" chunks or the list type for "LIST" chunks.
